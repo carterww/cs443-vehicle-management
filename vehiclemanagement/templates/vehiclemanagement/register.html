@@ -1,0 +1,177 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Dealership - Register</title>
+
+    <!-- Custom fonts for this template-->
+    <link href="{% static 'vendor/fontawesome-free/css/all.min.css'%}" rel="stylesheet" type="text/css">
+    <link
+        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+        rel="stylesheet">
+
+    <!-- Custom styles for this template-->
+    <link href="{% static 'css/sb-admin-2.min.css' %}" rel="stylesheet">
+
+</head>
+
+<body class="bg-gradient-primary">
+
+    <div class="container">
+
+        <div class="card o-hidden border-0 shadow-lg my-5">
+            <div class="card-body p-0">
+                <!-- Nested Row within Card Body -->
+                <div class="row justify-content-center">
+                    <div class="col-lg-9">
+                        <div class="p-5">
+                            <div class="text-center">
+                                <h1 class="h4 text-gray-900 mb-4">Register an Employee or Customer</h1>
+                            </div>
+                            <form class="user" action="/register/" method="PATCH">
+                                <div class="form-group">
+                                    <label class="col-form-label" for="user">Type User ID if editing User</label>
+                                    <input type="text" class="form-control form-constrol-user" name="user" placeholder="User ID"
+                                    oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');">
+                                </div>
+                                <button type="submit" class="btn btn-secondary btn-user btn-block" style="margin-bottom:50px;">
+                                    Edit User
+                                </button>
+                            </form>
+                            <form class="user" method="POST" action="/register/">
+                                {% csrf_token %}
+                                <div class="form-group row">
+                                    <div class="col-sm-6 mb-3 mb-sm-0">
+                                        <input type="text" class="form-control form-control-user" id="exampleFirstName"
+                                            placeholder="First Name" pattern="[a-zA-Z-]+" name="firstname" value="{{ curruser.first_name }}" required>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control form-control-user" id="exampleLastName"
+                                            placeholder="Last Name" pattern="[a-zA-Z-]+" name="lastname" value="{{ curruser.last_name }}" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" class="form-control form-control-user" id="exampleInputEmail"
+                                        placeholder="Username" name="username" pattern="[a-zA-Z0-9-]+" value="{{ curruser.username }}" required>
+                                </div>
+                                <div class="form-group">
+                                    <input type="email" class="form-control form-control-user" id="exampleInputEmail"
+                                        placeholder="Email Address" name="email" value="{{ curruser.email }}"required>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-sm-6 mb-3 mb-sm-0">
+                                        <input type="password" class="form-control form-control-user"
+                                            id="exampleInputPassword" placeholder="Password" name="password1" required>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <input type="password" class="form-control form-control-user"
+                                            id="exampleRepeatPassword" placeholder="Repeat Password" name="password2" required>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <select name="usertype" class="form-control"  onChange="renderForm(value)" required>
+                                        <option value="Customer" {% if curruser.employee is None %} selected {% endif %}>Customer</option>
+                                        <option value="Employee" {% if curruser.employee is not None %} selected {% endif %}>Employee</option>
+                                    </select>
+                                </div>
+
+                                <!-- employee items -->
+                                <div id="employeeform" {% if curruser.employee is None %} style="display:none" {% else %} style="display:block" {% endif %}>
+                                    <div class="form-group row">
+                                        <div class="col-sm-6 mb-3 mb-sm-0">
+                                            <input type="text" class="form-control form-control-user"
+                                                placeholder="Social Security Number" name="SSN" value="{{ curruser.employee.SSN }}"
+                                                pattern="[0-9-]+" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');">
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <input type="text" class="form-control form-control-user"
+                                                placeholder="Phone Number" name="phonenumber" value="{{ curruser.employee.phone_number }}"
+                                                pattern="[0-9-]+" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <div class="col-sm-6 mb-3 mb-sm-0">
+                                            <label class="col-form-label" for="birthday">Birthday</label>
+                                            <input type="date" class="form-control form-constrol-user" value="{{ curruser.employee.birthday|date:'Y-m-d' }}"
+                                                name="birthday">
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <label class="col-form-label" for="sex">Sex</label>
+                                            <select name="sex" class="form-control">
+                                                <option value="F" {% if curruser.employee.sex == 'F' %} selected {% endif %}>Female</option>
+                                                <option value="M" {% if curruser.employee.sex == 'M' %} selected {% endif %}>Male</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="number" class="form-control form-control-user" placeholder="Salary" value="{{ curruser.employee.salary }}" name="salary" step="0.01">
+                                    </div>
+                            
+                                    <div class="form-group row">
+                                        <div class="col-sm-6 mb-3 mb-sm-0">
+                                            <label class="col-form-label" for="department">Department</label>
+                                            <select name="department" class="form-control">
+                                                <option value="none">None</option>
+                                                {% for dep in departments %}
+                                                    <option value="{{ dep.id }}" {% if curruser.employee.employee_department.id is dep.id %} selected {% endif %}>
+                                                        {{ dep.department_name }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <label class="col-form-label" for="manager">Manager</label>
+                                            <select name="manager" class="form-control">
+                                                <option value="none">None</option>
+                                                {% for emp in employees %}
+                                                    <option value="{{ emp.user.id }}" {% if curruser.employee.manager.user.id is emp.user.id %} selected {% endif %}>
+                                                        {{ emp.user.first_name }} {{ emp.user.last_name }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <button type="submit" class="btn btn-primary btn-user btn-block">
+                                    Submit
+                                </button>
+                            </form>
+                            <hr>
+                            <div class="text-center">
+                                <a class="small" href="/login/">Login</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bootstrap core JavaScript-->
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+
+    <!-- Core plugin JavaScript-->
+    <script src="{% static 'vendor/jquery-easing/jquery.easing.min.js' %}"></script>
+
+    <!-- Custom scripts for all pages-->
+    <script src="{% static 'js/sb-admin-2.min.js' %}"></script>
+    <script src="{% static 'js/render-form.js' %}"></script>
+
+</body>
+
+</html>

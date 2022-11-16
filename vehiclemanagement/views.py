@@ -11,8 +11,25 @@ import math
 
 from .models import *
 
+def search_employee(request) :
+    context = {}
+
+    context['employees'] = Employee.objects.all()
+    customers = User.objects.filter(is_superuser=False)
+    amount = []
+
+    for c in customers :
+        amount.append(VehicleSale.objects.raw(f"""select SUM(sale_price) as sum, id from vehiclemanagement_vehiclesale
+            where customer_id = {c.id}""")[0].sum)
+
+    context['customers'] = zip(customers, amount)
+
+
+    return render(request, 'vehiclemanagement/find-employee.html', context)
+
 def search_vehicle(request) :
     context = {}
+    
 
     vehicles = Vehicle.objects.all()
 
@@ -23,11 +40,13 @@ def search_vehicle(request) :
 
         if request.POST.get('sold') == 'on':
             vehicles = vehicles.filter(is_sold=True)
+        else :
+            vehicles = vehicles.filter(is_sold=False)
     
         if request.POST.get('type') != 'none':
             vehicles = vehicles.filter(vehicle_model__vehicle_type=context['type'])
 
-    context['vehicles'] = vehicles
+    context['vehicles'] = vehicles.order_by('price')
 
     return render(request, 'vehiclemanagement/find-vehicle.html', context)
 
@@ -75,15 +94,15 @@ def register(request) :
             u = None
 
         userArgs = {
-            'first_name': request.POST.get('firstname'),
-            'last_name': request.POST.get('lastname'),
-            'email': request.POST.get('email'),
-            'username': request.POST.get('username')
+            'first_name': request.POST.get('firstname').lower(),
+            'last_name': request.POST.get('lastname').lower(),
+            'email': request.POST.get('email').lower(),
+            'username': request.POST.get('username').lower()
         }
         user = None
         if request.POST.get('password1') == request.POST.get('password2'):
             if u is None:
-                user = User.objects.create_user(request.POST.get('username'), request.POST.get('email'), request.POST.get('password1'))
+                user = User.objects.create_user(request.POST.get('username').lower(), request.POST.get('email').lower(), request.POST.get('password1'))
                 user = update_model(user, userArgs)
             elif u is not None :
                 user = get_object_or_404(User, pk=u.id)
@@ -144,9 +163,9 @@ def create_or_update_vehicle(request) :
             v = None
 
         vehicleModelArgs = {
-            'make': request.POST.get('make'),
-            'model': request.POST.get('model'),
-            'year': request.POST.get('year'),
+            'make': request.POST.get('make').lower(),
+            'model': request.POST.get('model').lower(),
+            'year': request.POST.get('year').lower(),
             'vehicle_type': request.POST.get('vehicle_type').lower()
         }
 
@@ -188,7 +207,36 @@ def create_or_update_vehicle(request) :
         else :
             v = update_model(v, vehicleArgs)
 
-        return redirect('/')
+        if vehicleModelArgs['vehicle_type'] == 'truck' :
+            truck = None
+            try :
+                truck = Truck.objects.get(vehicle=v)
+            except :
+                truck = Truck()
+
+            truckArgs = {
+                'vehicle': v,
+                'bed_area': request.POST.get('bed_area'),
+                'towing_capacity': request.POST.get('towing_capacity'),
+            }
+
+            update_model(truck, truckArgs)
+        else :
+            car = None
+            try :
+                car = Car.objects.get(vehicle=v)
+            except :
+                car = Car()
+
+            carArgs = {
+                'vehicle': v,
+                'max_speed': request.POST.get('max_speed'),
+                'no_of_seats': request.POST.get('no_of_seats'),
+            }
+
+            update_model(car, carArgs)
+
+        return redirect('/searchvehicle/')
 
         
 
@@ -196,7 +244,42 @@ def create_or_update_vehicle(request) :
 
 @login_required(login_url='/login')
 def create_or_update_sale(request) :
+    if request.method == 'PATCH' :
+        return redirect('/sale/' + request.PATCH.get('saleid') + '/')
+
     context = {}
+
+    context = {}
+
+    if request.method == 'GET':
+        v = request.GET.get('v', '')
+        sale_id = request.GET.get('saleid', '')
+        if v != '':
+            context['vehicle'] = get_object_or_404(Vehicle, vin_number=v)
+        if sale_id != '':
+            context['sale'] = get_object_or_404(VehicleSale, pk=sale_id)
+
+        context['employees'] = Employee.objects.all()
+        context['today'] = datetime.datetime.today()
+
+    if request.method == 'POST':
+        sale_id = request.POST.get('old_sale')
+
+        vehicleSaleArgs = {
+            'vehicle': get_object_or_404(Vehicle, vin_number=request.POST.get('vin_number')),
+            'customer': get_object_or_404(User, username=request.POST.get('customer').lower()),
+            'employee': get_object_or_404(Employee, user_id=request.POST.get('employee')),
+            'sale_price': request.POST.get('sale_price'),
+            'sale_date': request.POST.get('sale_date')
+        }
+
+        if sale_id == '':
+            update_model(VehicleSale(), vehicleSaleArgs)
+        else :
+            update_model(get_object_or_404(VehicleSale, pk=sale_id), vehicleSaleArgs)
+        update_model(get_object_or_404(Vehicle, vin_number=request.POST.get('vin_number')), { 'is_sold': True })
+
+        return redirect('/searchvehicle/')
 
     return render(request, 'vehiclemanagement/add-sale.html', context)
 
@@ -257,7 +340,7 @@ def get_revenue_chart_data(request):
             if c == None :
                 context[i] = "null"
             else :
-                context[i] == c
+                context[i] = c
 
         return JsonResponse(context)
     return JsonResponse({})

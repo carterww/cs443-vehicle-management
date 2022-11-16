@@ -80,13 +80,13 @@
 
                                 <div class="form-group">
                                     <select name="usertype" class="form-control"  onChange="renderForm(value)" required>
-                                        <option value="Customer" {% if curruser.employee is None %} selected {% endif %}>Customer</option>
-                                        <option value="Employee" {% if curruser.employee is not None %} selected {% endif %}>Employee</option>
+                                        <option value="Customer" {% if not curruser.is_superuser %} selected {% endif %}>Customer</option>
+                                        <option value="Employee" {% if curruser.is_superuser %} selected {% endif %}>Employee</option>
                                     </select>
                                 </div>
 
                                 <!-- employee items -->
-                                <div id="employeeform" {% if curruser.employee is None %} style="display:none" {% else %} style="display:block" {% endif %}>
+                                <div id="employeeform" {% if not curruser.is_superuser %} style="display:none" {% else %} style="display:block" {% endif %}>
                                     <div class="form-group row">
                                         <div class="col-sm-6 mb-3 mb-sm-0">
                                             <input type="text" class="form-control form-control-user"

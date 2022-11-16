@@ -12,7 +12,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Dealership - Add Sale</title>
+    <title>Dealership - Search User</title>
 
     <!-- Custom fonts for this template-->
     <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
@@ -70,7 +70,7 @@
                     <div class="bg-white py-2 collapse-inner rounded">
                         <!-- Add link to vehicle search page -->
                         <a class="collapse-item" href="/searchvehicle/">Vehicles</a>
-                        <a class="collapse-item" href="/searchuser/">Employees</a>
+                        <a class="collapse-item" href="#">Employees</a>
                     </div>
                 </div>
             </li>
@@ -87,7 +87,7 @@
                     data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <a class="collapse-item" href="/vehicle/">Add Vehicle</a>
-                        <a class="collapse-item" href="#">Add Sale</a>
+                        <a class="collapse-item" href="/sale/">Add Sale</a>
                         <a class="collapse-item" href="/register/">Add User</a>
                         <a class="collapse-item" href="/register/">Edit Employee</a>
                     </div>
@@ -177,75 +177,67 @@
                 <!-- Begin Page Content -->
                 <div class="container-fluid">
 
-                    <div class="row justify-content-center">
-                        <div class="col-xl-9 col-lg-7 col-md-6">
-                            <div class="card o-hidden border-0 shadow-lg my-5">
-                                <div class="card-body p-0">
-                                    <div class="row">
-                                        <div class="col-xl-12 col-lg-6 col-md-6">
-                                            <div class="p-5">
-                                                <div class="text-center">
-                                                    <h1 class="h4 text-gray-900 mb-4">Add or Update Sale</h1>
-                                                </div>
-                                                <form class="user" action="/sale/" method="PATCH">
-                                                    <div class="form-group">
-                                                        <label class="col-form-label" for="sale_id">Type Sale ID</label>
-                                                        <input type="text" class="form-control form-constrol-user" name="sale_id" placeholder="Sale ID"
-                                                        oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');">
-                                                    </div>
-                                                    <button type="submit" class="btn btn-secondary btn-user btn-block" style="margin-bottom:50px;">
-                                                        Edit Sale
-                                                    </button>
-                                                </form>
-                                                <form class="user" action="/sale/" method="POST">
-                                                    {% csrf_token %}
-                                                    <div class="form-group row">
-                                                        <div class="col-sm-6 mb-3 mb-sm-0">
-                                                            <label class="col-form-label" for="vin_number">Vehicle Sold</label>
-                                                            <input type="text" class="form-control form-control-user" name="vin_number"
-                                                                placeholder="Vin Number" pattern="[a-zA-Z0-9-]+" required
-                                                                oninput="this.value = this.value.replace(/[^a-zA-Z0-9.]/g, '').replace(/(\..*)\./g, '$1');"
-                                                                {% if vehicle is not None %} value="{{ vehicle.vin_number }}" {% elif sale is not None %} value="{{ sale.vehicle.vin_number }}" {% endif %}>
-                                                        </div>
-                                                        <div class="col-sm-6">
-                                                            <label class="col-form-label" for="employee">Employee</label>
-                                                            <select name="employee" class="form-control" required>
-                                                                <!-- Add employees to be shown here in view context -->
-                                                                {% for emp in employees %}
-                                                                    <option value="{{ emp.user.id }}" {% if sale.employee.user.id == emp.user.id %} selected {% endif %}>
-                                                                        {{ emp.user.first_name }} {{ emp.user.last_name }}
-                                                                    </option>
-                                                                {% endfor %}
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label class="col-form-label" for="customer">Username of Customer</label>
-                                                        <input type="text" class="form-control form-control-user" placeholder="Customer's Username" name="customer"
-                                                            pattern="[a-zA-Z0-9-]+"oninput="this.value = this.value.replace(/[^a-zA-Z0-9.]/g, '').replace(/(\..*)\./g, '$1');"
-                                                            {% if sale is not None %} value="{{ sale.customer.username }}" {% endif %}>
-                                                    </div>
-                                                    <div class="form-group row">
-                                                        <div class="col-sm-6 mb-3 mb-sm-0">
-                                                            <label class="col-form-label" for="sale_date">Date of Sale</label>
-                                                            <input type="date" class="form-control form-constrol-user"
-                                                                name="sale_date" required {% if sale is not None %} value="{{ sale.sale_date|date:'Y-m-d' }}" {% else %} value="{{ today|date:'Y-m-d' }}" {% endif %}>
-                                                        </div>
-                                                        <div class="col-sm-6">
-                                                            <label class="col-form-label" for="sale_price">Total Sale Price</label>
-                                                            <input type="number" class="form-control form-control-user" step="0.01"
-                                                                name="sale_price" placeholder="Paid Price" required {% if sale is not None %} value="{{ sale.sale_price }}" {{ else }} value="{{ vehicle.price }}" {% endif %}>
-                                                        </div>
-                                                    </div>
-                                                    <input type="hidden" name="old_sale" {% if sale is not None %} value="{{ sale.id }}" {% else %} value="" {% endif %}>
-                                                    <button type="submit" class="btn btn-primary btn-user btn-block">
-                                                        Submit
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                    <h1 class="h3 mb-2 text-gray-800">Employees and Customers</h1>
+
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Employees</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Salary</th>
+                                            <th>Department</th>
+                                            <th>Manager</th>
+                                            <th>ID</th>
+                                            <th>Email</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for e in employees %}
+                                        <tr>
+                                            <td><a  href="/register/?user={{ e.user.id }}">{{ e.user.first_name }} {{ e.user.last_name }}</a></td>
+                                            <td>${{ e.salary|floatformat:2|intcomma }}</td>
+                                            <td>{{ e.employee_department.department_name }}</td>
+                                            <td>{% if e.manager is not None %}{{ e.manager.user.first_name }} {{ e.manager.user.last_name }} {% else %}None {% endif %}</td>
+                                            <td>{{ e.user.id }}</td>
+                                            <td>{{ e.user.email }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Customers</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Username</th>
+                                            <th>Email</th>
+                                            <th>Purchase Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for c, amount in customers %}
+                                        <tr>
+                                            <td><a href="/register/?user={{ c.id }}">{{ c.first_name }} {{ c.last_name }}</a></td>
+                                            <td>{{ c.username }}</td>
+                                            <td>{{ c.email }}</td>
+                                            <td>${% if amount %}{{ amount|floatformat:2|intcomma }}{% else %}0{% endif %}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>

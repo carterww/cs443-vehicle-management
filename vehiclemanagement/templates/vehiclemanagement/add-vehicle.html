@@ -12,7 +12,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Dealership - Vehicle</title>
+    <title>Dealership - Add Vehicle</title>
 
     <!-- Custom fonts for this template-->
     <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
@@ -69,8 +69,8 @@
                 <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <!-- Add link to vehicle search page -->
-                        <a class="collapse-item" href="">Vehicles</a>
-                        <a class="collapse-item" href="">Employees</a>
+                        <a class="collapse-item" href="/searchvehicle/">Vehicles</a>
+                        <a class="collapse-item" href="/searchuser/">Employees</a>
                     </div>
                 </div>
             </li>
@@ -86,7 +86,7 @@
                 <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities"
                     data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
-                        <a class="collapse-item" href="/searchvehicle/">Add Vehicle</a>
+                        <a class="collapse-item" href="/vehicle/">Add Vehicle</a>
                         <a class="collapse-item" href="/sale/">Add Sale</a>
                         <a class="collapse-item" href="/register/">Add User</a>
                         <a class="collapse-item" href="/register/">Edit Employee</a>
@@ -228,7 +228,7 @@
                                                     </div>
                                                     <div class="form-group row">
                                                         <div class="col-sm-6 mb-3 mb-sm-0">
-                                                            <select name="vehicle_type" class="form-control" required>
+                                                            <select name="vehicle_type" class="form-control" required onchange="switchform(value)">
                                                                 <option value="sedan" {% if vehicle.vehicle_model.vehicle_type == 'sedan' or  vehicle is None %} selected {% endif %}>Sedan</option>
                                                                 <option value="suv" {% if vehicle.vehicle_model.vehicle_type == 'suv' %} selected {% endif %}>SUV</option>
                                                                 <option value="crossover" {% if vehicle.vehicle_model.vehicle_type == 'crossover' %} selected {% endif %}>Crossover</option>
@@ -243,10 +243,30 @@
                                                                 placeholder="Current Mileage" required value="{{ vehicle.mileage }}">
                                                         </div>
                                                     </div>
+                                                    <div class="form-group row" id="car" {% if vehicle.vehicle_model.vehicle_type != 'truck' %} style="display:flex" {% else %} style="display:none" {% endif %}>
+                                                        <div class="col-sm-6 mb-3 mb-sm-0">
+                                                            <input type="number" name="max_speed" class="form-control form-control-user"
+                                                                placeholder="Maximum Speed" value="{{ vehicle.car.max_speed }}">
+                                                        </div>
+                                                        <div class="col-sm-6">
+                                                            <input type="number" name="no_of_seats" class="form-control form-control-user"
+                                                                placeholder="Number of Seats" value="{{ vehicle.car.no_of_seats }}">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row" id="truck" {% if vehicle.vehicle_model.vehicle_type != 'truck' %} style="display:none" {% else %} style="display:flex" {% endif %}>
+                                                        <div class="col-sm-6 mb-3 mb-sm-0">
+                                                            <input type="number" name="bed_area" class="form-control form-control-user"
+                                                                placeholder="Area of Bed" value="{{ vehicle.truck.bed_area }}" step="0.01">
+                                                        </div>
+                                                        <div class="col-sm-6">
+                                                            <input type="number" name="towing_capacity" class="form-control form-control-user"
+                                                                placeholder="Towing Capactity (lbs)" value="{{ vehicle.truck.towing_capacity }}">
+                                                        </div>
+                                                    </div>
                                                     <div class="form-group row">
                                                         <div class="col-sm-6 mb-3 mb-sm-0">
                                                             <input type="text" name="trim_level" class="form-control form-control-user"
-                                                                placeholder="Trim Level" pattern="[a-zA-Z-]+" required value="{{ vehicle.trim_level }}">
+                                                                placeholder="Trim Level" pattern="[a-zA-Z0-9-]+" required value="{{ vehicle.trim_level }}">
                                                         </div>
                                                         <div class="col-sm-6">
                                                             <input type="number" name="mpg" class="form-control form-control-user"
@@ -351,6 +371,17 @@
 
     <!-- Custom scripts for all pages-->
     <script src="{% static 'js/sb-admin-2.min.js' %}"></script>
+    <script>
+        function switchform(value) {
+            if (value == 'truck') {
+                document.getElementById('truck').style.display = 'flex'
+                document.getElementById('car').style.display = 'none'
+            } else {
+                document.getElementById('truck').style.display = 'none'
+                document.getElementById('car').style.display = 'flex'
+            }
+        }
+    </script>
 </body>
 
 </html>

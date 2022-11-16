@@ -71,7 +71,7 @@
                     <div class="bg-white py-2 collapse-inner rounded">
                         <!-- Add link to vehicle search page -->
                         <a class="collapse-item" href="#">Vehicles</a>
-                        <a class="collapse-item" href="">Employees</a>
+                        <a class="collapse-item" href="/searchuser/">Employees</a>
                     </div>
                 </div>
             </li>
@@ -252,6 +252,13 @@
                                     <b>In Stock:</b> {% if v.is_sold %} No {% else %} Yes {% endif %}<br>
                                     <b>Trim:</b> {{ v.trim_level }}<br>
                                     <b>Description:</b> {{ v.description|capfirst }}
+                                    {% if v.car %}
+                                    <br><b>Max Speed:</b> {{ v.car.max_speed }} MPH<br>
+                                    <b>Number Of Seats:</b> {{ v.car.no_of_seats }}
+                                    {% else %}
+                                    <br><b>Bed Area:</b> {{ v.truck.bed_area }} sqft<br>
+                                    <b>Towing Capacity:</b> {{ v.truck.towing_capacity|intcomma }} lbs
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>

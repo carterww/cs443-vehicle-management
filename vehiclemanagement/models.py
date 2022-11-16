@@ -58,7 +58,8 @@ class Vehicle(models.Model):
 
 class Car(models.Model):
     vehicle = models.OneToOneField('Vehicle', primary_key=True, on_delete=models.CASCADE, related_name='car')
-    trunk_area = models.FloatField()
+    max_speed = models.SmallIntegerField(null=True)
+    no_of_seats = models.SmallIntegerField(null=True)
 
     def __str__(self):
         return self.vehicle.vin_number
@@ -66,7 +67,7 @@ class Car(models.Model):
 class Truck(models.Model):
     vehicle = models.OneToOneField('Vehicle', primary_key=True, on_delete=models.CASCADE, related_name='truck')
     bed_area = models.FloatField()
-    number_of_axles = models.SmallIntegerField()
+    towing_capacity = models.IntegerField(null=True)
 
     def __str__(self):
         return self.vehicle.vin_number

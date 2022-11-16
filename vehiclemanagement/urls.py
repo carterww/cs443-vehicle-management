@@ -17,4 +17,5 @@ urlpatterns = [
     path('vehicle/', views.create_or_update_vehicle, name='vehicle'),
     path('sale/', views.create_or_update_sale, name='sale'),
     path('searchvehicle/', views.search_vehicle, name='search_vehicle'),
+    path('searchuser/', views.search_employee, name='search_employee'),
 ]

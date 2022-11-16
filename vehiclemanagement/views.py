@@ -7,8 +7,29 @@ from django.http import JsonResponse
 from django.core.files.storage import FileSystemStorage
 
 import datetime
+import math
 
 from .models import *
+
+def search_vehicle(request) :
+    context = {}
+
+    vehicles = Vehicle.objects.all()
+
+    if request.method == 'POST' :
+        context['checked'] = request.POST.get('sold')
+        if request.POST.get('type') != 'none':
+            context['type'] = request.POST.get('type')
+
+        if request.POST.get('sold') == 'on':
+            vehicles = vehicles.filter(is_sold=True)
+    
+        if request.POST.get('type') != 'none':
+            vehicles = vehicles.filter(vehicle_model__vehicle_type=context['type'])
+
+    context['vehicles'] = vehicles
+
+    return render(request, 'vehiclemanagement/find-vehicle.html', context)
 
 # logs user in
 def login_(request):
@@ -49,7 +70,7 @@ def register(request) :
     if request.method == 'POST':
         u = None
         try :
-            u = User.objects.get(username=request.POST.get('username'))
+            u = User.objects.get(id=request.POST.get('id'))
         except :
             u = None
 
@@ -111,8 +132,6 @@ def create_or_update_vehicle(request) :
     context = {}
 
     if request.method == 'GET':
-
-
         v = request.GET.get('v', '')
         if v != '':
             context['vehicle'] = get_object_or_404(Vehicle, vin_number=v)
@@ -120,7 +139,7 @@ def create_or_update_vehicle(request) :
     if request.method == 'POST':
         v = None
         try :
-            v = Vehicle.objects.get(vin_number=v)
+            v = Vehicle.objects.get(vin_number=request.POST.get('old_vin'))
         except :
             v = None
 
@@ -128,7 +147,7 @@ def create_or_update_vehicle(request) :
             'make': request.POST.get('make'),
             'model': request.POST.get('model'),
             'year': request.POST.get('year'),
-            'vehicle_type': request.POST.get('vehicle_type')
+            'vehicle_type': request.POST.get('vehicle_type').lower()
         }
 
         vehicleArgs = {
@@ -152,11 +171,17 @@ def create_or_update_vehicle(request) :
             vmodel = update_model(VehicleModel(), vehicleModelArgs)
 
         vehicleArgs['vehicle_model'] = vmodel
-        image = request.FILES['pic']
-        fss = FileSystemStorage()
-        file = fss.save(image.name, image)
+        image= None
+        fss = None
+        try :
+            image = request.FILES['pic']
+            fss = FileSystemStorage()
+        except:
+            image = None
+        if image is not None :
+            file = fss.save(image.name, image)
 
-        vehicleArgs['image'] = fss.url(file) 
+            vehicleArgs['image'] = fss.url(file) 
 
         if v is None :
             v = update_model(Vehicle(), vehicleArgs)

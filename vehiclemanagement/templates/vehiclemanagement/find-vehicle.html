@@ -1,6 +1,7 @@
 {% load static %}
 {% load humanize %}
 
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -12,7 +13,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Dealership - Add Sale</title>
+    <title>Dealership - Search Vehicles</title>
 
     <!-- Custom fonts for this template-->
     <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
@@ -69,7 +70,7 @@
                 <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <!-- Add link to vehicle search page -->
-                        <a class="collapse-item" href="/searchvehicle/">Vehicles</a>
+                        <a class="collapse-item" href="#">Vehicles</a>
                         <a class="collapse-item" href="">Employees</a>
                     </div>
                 </div>
@@ -87,7 +88,7 @@
                     data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <a class="collapse-item" href="/vehicle/">Add Vehicle</a>
-                        <a class="collapse-item" href="#">Add Sale</a>
+                        <a class="collapse-item" href="/sale/">Add Sale</a>
                         <a class="collapse-item" href="/register/">Add User</a>
                         <a class="collapse-item" href="/register/">Edit Employee</a>
                     </div>
@@ -121,6 +122,44 @@
 
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
+
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseFilters"
+                    aria-expanded="true" aria-controls="collapseFilters">
+                    <i class="fas fa-fw fa-search"></i>
+                    <span>Filters</span>
+                </a>
+                <div id="collapseFilters" class="collapse" aria-labelledby="headingFilters" data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <form class="user" action="/searchvehicle/" method="POST">
+                            {% csrf_token %}
+                            <div class="row justify-content-center">
+                                <input type="checkbox" name="sold" {% if checked %} checked {% endif %}>
+                                <label for="sold" class="collapse-item">Is Sold?</label>
+                            </div>
+                            <div class="row justify-content-center">
+                                <select name="type" class="form-control" style="width:auto">
+                                    <option value="none" selected>All Types</option>
+                                    <option value="sedan" {% if type == 'sedan' %} selected {% endif %}>Sedan</option>
+                                    <option value="suv" {% if type == 'suv' %} selected {% endif %}>SUV</option>
+                                    <option value="crossover" {% if type == 'crossover' %} selected {% endif %}>Crossover</option>
+                                    <option value="coupe" {% if type == 'coupe' %} selected {% endif %}>Coupe</option>
+                                    <option value="minivan" {% if type == 'minivan' %} selected {% endif %}>Minivan</option>
+                                    <option value="truck" {% if type == 'truck' %} selected {% endif %}>Truck</option>
+                                    <option value="hatchback" {% if type == 'hatchback' %} selected {% endif %}>Hatchback</option>
+                                </select>
+                            </div>
+                            <br>
+                            <div class="row justify-content-center">
+                                <button type="submit" class="btn btn-primary" style="width:50%;">
+                                    Filter
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </li>
+
 
             <!-- Sidebar Toggler (Sidebar) -->
             <div class="text-center d-none d-md-inline">
@@ -177,68 +216,46 @@
                 <!-- Begin Page Content -->
                 <div class="container-fluid">
 
-                    <div class="row justify-content-center">
-                        <div class="col-xl-9 col-lg-7 col-md-6">
-                            <div class="card o-hidden border-0 shadow-lg my-5">
-                                <div class="card-body p-0">
-                                    <div class="row">
-                                        <div class="col-xl-12 col-lg-6 col-md-6">
-                                            <div class="p-5">
-                                                <div class="text-center">
-                                                    <h1 class="h4 text-gray-900 mb-4">Add or Update Sale</h1>
-                                                </div>
-                                                <form class="user" action="/sale/" method="POST">
-                                                    <div class="form-group row">
-                                                        <div class="col-sm-6 mb-3 mb-sm-0">
-                                                            <label class="col-form-label" for="vehicle">Vehicle Sold</label>
-                                                            <select name="vehicle" class="form-control" required>
-                                                                <!-- Add vehicles to be shown here in view context -->
-                                                                {% for v in vehicles %}
-                                                                    <option value="{{ v.vin_number }}">
-                                                                        #{{ v.vin_number }}
-                                                                    </option>
-                                                                {% endfor %}
-                                                            </select>
-                                                        </div>
-                                                        <div class="col-sm-6">
-                                                            <label class="col-form-label" for="employee">Employee</label>
-                                                            <select name="employee" class="form-control" required>
-                                                                <!-- Add employees to be shown here in view context -->
-                                                                {% for emp in employees %}
-                                                                    <option value="{{ emp.user.id }}">
-                                                                        {{ emp.user.first_name }} {{ emp.user.last_name }}
-                                                                    </option>
-                                                                {% endfor %}
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label class="col-form-label" for="customer">Username of Customer</label>
-                                                        <input type="text" class="form-control form-control-user" placeholder="Customer's Username" name="customer"
-                                                            pattern="[a-zA-Z0-9-]+"oninput="this.value = this.value.replace(/[^a-zA-Z0-9.]/g, '').replace(/(\..*)\./g, '$1');">
-                                                    </div>
-                                                    <div class="form-group row">
-                                                        <div class="col-sm-6 mb-3 mb-sm-0">
-                                                            <label class="col-form-label" for="sale_date">Date of Sale</label>
-                                                            <input type="date" class="form-control form-constrol-user"
-                                                                name="sale_date" required>
-                                                        </div>
-                                                        <div class="col-sm-6">
-                                                            <label class="col-form-label" for="sale_price">Total Sale Price</label>
-                                                            <input type="number" class="form-control form-control-user"
-                                                                name="sale_price" placeholder="Paid Price" required>
-                                                        </div>
-                                                    </div>
-                                                    <button type="submit" class="btn btn-primary btn-user btn-block">
-                                                        Submit
-                                                    </button>
-                                                </form>
-                                            </div>
+                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                        <h1 class="h3 mb-0 text-gray-800">Vehicles from Database</h1>
+                    </div>
+                    <div class="row">
+                    {% for v in vehicles %}
+                        
+                        <div class="col-xl-4">
+                            <div class="card shadow mb-4">
+                                <!-- Card Header - Dropdown -->
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-primary">{{v.vehicle_model.year}} {{ v.vehicle_model.make }} {{ v.vehicle_model.model }}</h6>
+                                    <div class="dropdown no-arrow">
+                                        <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                                        </a>
+                                        <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                                            aria-labelledby="dropdownMenuLink">
+                                            <div class="dropdown-header">Vehicle Actions</div>
+                                            {% if not v.is_sold %}<a class="dropdown-item" href="/sale/?v={{v.vin_number}}">Add Sale</a>{% endif %}
+                                            <a class="dropdown-item" href="/vehicle/?v={{v.vin_number}}">Edit Vehicle</a>
                                         </div>
                                     </div>
                                 </div>
+                                <!-- Card Body -->
+                                <div class="card-body">
+                                    <img src="{{ v.image }}" alt="Vehicle Image" height="auto" width="100%">
+                                    <hr>
+                                    <b>Vin Number:</b> {{ v.vin_number }}<br>
+                                    <b>Price:</b> ${{ v.price|floatformat:2|intcomma }}<br>
+                                    <b>Mileage:</b> {{ v.mileage|intcomma }}<br>
+                                    <b>Miles Per Gallon</b> {{ v.mpg }}<br>
+                                    <b>Color:</b> {{ v.color|capfirst }}<br>
+                                    <b>In Stock:</b> {% if v.is_sold %} No {% else %} Yes {% endif %}<br>
+                                    <b>Trim:</b> {{ v.trim_level }}<br>
+                                    <b>Description:</b> {{ v.description|capfirst }}
+                                </div>
                             </div>
                         </div>
+                    {% endfor %}
                     </div>
                 </div>
                 <!-- /.container-fluid -->

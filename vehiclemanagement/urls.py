@@ -1,4 +1,7 @@
 from django.urls import path, re_path
+from django.views.generic.base import RedirectView
+from django.conf import settings
+import os
 
 from . import views
 
@@ -13,4 +16,5 @@ urlpatterns = [
     path('zzz/chart/', views.get_revenue_chart_data, name='revenue_chart'),
     path('vehicle/', views.create_or_update_vehicle, name='vehicle'),
     path('sale/', views.create_or_update_sale, name='sale'),
+    path('searchvehicle/', views.search_vehicle, name='search_vehicle'),
 ]

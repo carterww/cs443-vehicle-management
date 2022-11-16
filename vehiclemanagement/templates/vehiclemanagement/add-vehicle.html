@@ -86,7 +86,7 @@
                 <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities"
                     data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
-                        <a class="collapse-item" href="#">Add Vehicle</a>
+                        <a class="collapse-item" href="/searchvehicle/">Add Vehicle</a>
                         <a class="collapse-item" href="/sale/">Add Sale</a>
                         <a class="collapse-item" href="/register/">Add User</a>
                         <a class="collapse-item" href="/register/">Edit Employee</a>
@@ -204,79 +204,84 @@
                                                         <div class="col-sm-6 mb-3 mb-sm-0">
                                                             <input type="text" class="form-control form-control-user" name="vin_number"
                                                                 placeholder="Vin Number" pattern="[a-zA-Z0-9-]+" required
-                                                                oninput="this.value = this.value.replace(/[^a-zA-Z0-9.]/g, '').replace(/(\..*)\./g, '$1');">
+                                                                oninput="this.value = this.value.replace(/[^a-zA-Z0-9.]/g, '').replace(/(\..*)\./g, '$1');"
+                                                                value="{{ vehicle.vin_number }}">
                                                             
                                                         </div>
                                                         <div class="col-sm-6">
                                                             <input type="text" class="form-control form-control-user"
-                                                                placeholder="Vehicle Make" pattern="[a-zA-Z-]+" name="make" required>
+                                                                placeholder="Vehicle Make" pattern="[a-zA-Z-]+" name="make" required
+                                                                value="{{ vehicle.vehicle_model.make }}">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
                                                         <div class="col-sm-6 mb-3 mb-sm-0">
                                                             <input type="text" class="form-control form-control-user" name="model"
-                                                                placeholder="Vehicle Model" pattern="[a-zA-Z0-9-]+" required>
+                                                                placeholder="Vehicle Model" pattern="[a-zA-Z0-9-]+" required
+                                                                value="{{ vehicle.vehicle_model.model }}">
                                                         </div>
                                                         <div class="col-sm-6">
                                                             <input type="number" class="form-control form-control-user"
-                                                                placeholder="Year" name="year" required>
+                                                                placeholder="Year" name="year" required
+                                                                value="{{ vehicle.vehicle_model.year }}">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
                                                         <div class="col-sm-6 mb-3 mb-sm-0">
                                                             <select name="vehicle_type" class="form-control" required>
-                                                                <option value="sedan" selected>Sedan</option>
-                                                                <option value="sedan">SUV</option>
-                                                                <option value="crossover">Crossover</option>
-                                                                <option value="coupe">Coupe</option>
-                                                                <option value="minivan">Minivan</option>
-                                                                <option value="truck">Truck</option>
-                                                                <option value="hatchback">Hatchback</option>
+                                                                <option value="sedan" {% if vehicle.vehicle_model.vehicle_type == 'sedan' or  vehicle is None %} selected {% endif %}>Sedan</option>
+                                                                <option value="suv" {% if vehicle.vehicle_model.vehicle_type == 'suv' %} selected {% endif %}>SUV</option>
+                                                                <option value="crossover" {% if vehicle.vehicle_model.vehicle_type == 'crossover' %} selected {% endif %}>Crossover</option>
+                                                                <option value="coupe" {% if vehicle.vehicle_model.vehicle_type == 'coupe' %} selected {% endif %}>Coupe</option>
+                                                                <option value="minivan" {% if vehicle.vehicle_model.vehicle_type == 'minivan' %} selected {% endif %}>Minivan</option>
+                                                                <option value="truck" {% if vehicle.vehicle_model.vehicle_type == 'truck' %} selected {% endif %}>Truck</option>
+                                                                <option value="hatchback" {% if vehicle.vehicle_model.vehicle_type == 'hatchback' %} selected {% endif %}>Hatchback</option>
                                                             </select>
                                                         </div>
                                                         <div class="col-sm-6">
                                                             <input type="number" name="mileage" class="form-control form-control-user"
-                                                                placeholder="Current Mileage" required>
+                                                                placeholder="Current Mileage" required value="{{ vehicle.mileage }}">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
                                                         <div class="col-sm-6 mb-3 mb-sm-0">
                                                             <input type="text" name="trim_level" class="form-control form-control-user"
-                                                                placeholder="Trim Level" pattern="[a-zA-Z-]+" required>
+                                                                placeholder="Trim Level" pattern="[a-zA-Z-]+" required value="{{ vehicle.trim_level }}">
                                                         </div>
                                                         <div class="col-sm-6">
                                                             <input type="number" name="mpg" class="form-control form-control-user"
-                                                                placeholder="Miles Per Gallon" required>
+                                                                placeholder="Miles Per Gallon" required value="{{ vehicle.mpg }}">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
                                                         <div class="col-sm-6 mb-3 mb-sm-0">
                                                             <select name="color" class="form-control" required>
-                                                                <option value="white">White</option>
-                                                                <option value="black">Black</option>
-                                                                <option value="red">Red</option>
-                                                                <option value="blue">Blue</option>
-                                                                <option value="green">Green</option>
-                                                                <option value="brown">Brown</option>
-                                                                <option value="gray">Gray</option>
-                                                                <option value="silver">Silver</option>
-                                                                <option value="yellow">Yellow</option>
-                                                                <option value="orange">Orange</option>
+                                                                <option value="white" {% if vehicle.color == 'white' %} selected {% endif %}>White</option>
+                                                                <option value="black" {% if vehicle.color == 'black' %} selected {% endif %}>Black</option>
+                                                                <option value="red"  {% if vehicle.color == 'red' %} selected {% endif %}>Red</option>
+                                                                <option value="blue"  {% if vehicle.color == 'blue' %} selected {% endif %}>Blue</option>
+                                                                <option value="green"  {% if vehicle.color == 'green' %} selected {% endif %}>Green</option>
+                                                                <option value="brown"  {% if vehicle.color == 'brown' %} selected {% endif %}>Brown</option>
+                                                                <option value="gray"  {% if vehicle.color == 'gray' %} selected {% endif %}>Gray</option>
+                                                                <option value="silver"  {% if vehicle.color == 'silver' %} selected {% endif %}>Silver</option>
+                                                                <option value="yellow"  {% if vehicle.color == 'yellow' %} selected {% endif %}>Yellow</option>
+                                                                <option value="orange"  {% if vehicle.color == 'orange' %} selected {% endif %}>Orange</option>
                                                             </select>
                                                         </div>
                                                         <div class="col-sm-6">
                                                             <input type="number" name="price" class="form-control form-control-user"
-                                                                placeholder="Sticker Price" step="0.01" required>
+                                                                placeholder="Sticker Price" step="0.01" required value="{{ vehicle.price }}">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
                                                         <div class="col-sm-6 mb-3 mb-sm-0">
-                                                            <textarea name="description" class="form-control" placeholder="Short Description" maxlength="511" required></textarea>
+                                                            <textarea name="description" class="form-control" placeholder="Short Description" maxlength="511" required>{{ vehicle.description }}</textarea>
                                                         </div>
                                                         <div class="col-sm-6">
                                                             <label class="col-form-label" for="pic">Vehicle Photo</label>
-                                                            <input type="file" name="pic" accept="image/*" required>
-                                                        </div>  
+                                                            <input type="file" name="pic" accept="image/*">
+                                                        </div>
+                                                        <input type="hidden" name="old_vin" value="{{ vehicle.vin_number }}">
                                                     </div>
                                                     
                                                     <button type="submit" class="btn btn-primary btn-user btn-block">

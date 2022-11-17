@@ -1,7 +1,5 @@
-from django.urls import path, re_path
-from django.views.generic.base import RedirectView
-from django.conf import settings
-import os
+from django.urls import path
+
 
 from . import views
 

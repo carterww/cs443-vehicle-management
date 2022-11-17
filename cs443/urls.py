@@ -21,9 +21,11 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('vehiclemanagement.urls')),
+    path('', include('vehiclemanagement.urls')), # include all urls from vehiclemanagement/urls.py
     
 ]
+
+# Add urls for all images in /media/
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL,
                           document_root=settings.MEDIA_ROOT)

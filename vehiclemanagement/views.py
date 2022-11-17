@@ -1,3 +1,8 @@
+# This file contains all the controllers for handling the models and creating the view.
+# Each function that returns render() is associated with a url and handles HTTP requests from that url.
+# These functions interact with the database through django's ORM and returns HTML pages for the user.
+
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -11,14 +16,17 @@ import math
 
 from .models import *
 
+# Function that displays customers and employees
 @login_required(login_url='/login')
 def search_employee(request) :
     context = {}
 
+    # grab all employees and customers
     context['employees'] = Employee.objects.all()
     customers = User.objects.filter(is_superuser=False)
     amount = []
 
+    # Grab total purchase amount made by each customer
     for c in customers :
         amount.append(VehicleSale.objects.raw(f"""select SUM(sale_price) as sum, id from vehiclemanagement_vehiclesale
             where customer_id = {c.id}""")[0].sum)
@@ -28,18 +36,22 @@ def search_employee(request) :
 
     return render(request, 'vehiclemanagement/find-employee.html', context)
 
+# Function that displays all vehicles in the database
 @login_required(login_url='/login')
 def search_vehicle(request) :
     context = {}
     
-
+    # grab all vehicles in database
     vehicles = Vehicle.objects.all()
 
+    # Handle filter form
     if request.method == 'POST' :
         context['checked'] = request.POST.get('sold')
+
         if request.POST.get('type') != 'none':
             context['type'] = request.POST.get('type')
 
+        # filter vehicles based on form input
         if request.POST.get('sold') == 'on':
             vehicles = vehicles.filter(is_sold=True)
         else :
@@ -48,6 +60,7 @@ def search_vehicle(request) :
         if request.POST.get('type') != 'none':
             vehicles = vehicles.filter(vehicle_model__vehicle_type=context['type'])
 
+    # pass vehicles to html page and order them from low to high price
     context['vehicles'] = vehicles.order_by('price')
 
     return render(request, 'vehiclemanagement/find-vehicle.html', context)
@@ -64,7 +77,7 @@ def login_(request):
 
         user = authenticate(request, username=username, password=password)
 
-        if user is not None and user.is_superuser:
+        if user is not None and user.is_superuser: # ensure user is an employee
             login(request, user)
             return redirect('/')
         else :
@@ -73,11 +86,16 @@ def login_(request):
     return render(request, 'vehiclemanagement/login.html', {})
 
 # create a customer or employee
+# must be done by a logged in user
 @login_required(login_url='/login')
 def register(request) :
+
+    # redirects user if they input a user id as a query param in url
     if request.method == 'PATCH' :
         return redirect('/register/' + request.PATCH.get('user') + '/')
     context = {}
+
+    # grab user from url param, if there is one, and pass information to html page for form data
     if request.method == 'GET' :
         u = request.GET.get('user', '')
 
@@ -88,6 +106,7 @@ def register(request) :
             context['departments'] = Department.objects.all()
             context['employees'] = Employee.objects.all()
 
+    # handle reqeust to create a new customer or employee
     if request.method == 'POST':
         u = None
         try :
@@ -95,6 +114,7 @@ def register(request) :
         except :
             u = None
 
+        # grab column data for auth_user table and put into dictionary (map)
         userArgs = {
             'first_name': request.POST.get('firstname').lower(),
             'last_name': request.POST.get('lastname').lower(),
@@ -102,6 +122,7 @@ def register(request) :
             'username': request.POST.get('username').lower()
         }
         user = None
+        # if passwords match, create new user
         if request.POST.get('password1') == request.POST.get('password2'):
             if u is None:
                 user = User.objects.create_user(request.POST.get('username').lower(), request.POST.get('email').lower(), request.POST.get('password1'))
@@ -113,7 +134,9 @@ def register(request) :
         else :
             return redirect('/register/')
 
+        # if registering an employee, create a new employee
         if request.POST.get('usertype') == 'Employee' :
+            # grab form data and put into dictionary
             empArgs = {
                 'user': user,
                 'SSN': request.POST.get('SSN'),
@@ -129,6 +152,7 @@ def register(request) :
             if request.POST.get('manager') != 'none' :
                 empArgs['manager'] = get_object_or_404(Employee, pk=request.POST.get('manager'))
 
+            # create or update employee model
             if u is None :
                 update_model(Employee(), empArgs)
                 update_model(user, { 'is_superuser': True })
@@ -145,18 +169,22 @@ def logout_user(request) :
 
     return redirect('/login/')
 
+# handles creation or updating of a vehicle model
 @login_required(login_url='/login')
 def create_or_update_vehicle(request) :
+    # grab vehicle vin number from url query param
     if request.method == 'PATCH' :
         return redirect('/vehicle/' + request.PATCH.get('v') + '/')
 
     context = {}
 
+    # send data for form to html page
     if request.method == 'GET':
         v = request.GET.get('v', '')
         if v != '':
             context['vehicle'] = get_object_or_404(Vehicle, vin_number=v)
 
+    # handle create or update of vehicle
     if request.method == 'POST':
         v = None
         try :
@@ -164,6 +192,7 @@ def create_or_update_vehicle(request) :
         except :
             v = None
 
+        # grab model args
         vehicleModelArgs = {
             'make': request.POST.get('make').lower(),
             'model': request.POST.get('model').lower(),
@@ -171,6 +200,7 @@ def create_or_update_vehicle(request) :
             'vehicle_type': request.POST.get('vehicle_type').lower()
         }
 
+        # grab vehicle args
         vehicleArgs = {
             'vin_number': request.POST.get('vin_number'),
             'price': request.POST.get('price'),
@@ -182,7 +212,7 @@ def create_or_update_vehicle(request) :
             'description': request.POST.get('description')
         }
     
-
+        # either select existing model or create new one
         vmodel = None
         try :
             vmodel = VehicleModel.objects.get(make=vehicleModelArgs['make'], model=vehicleModelArgs['model'],year=vehicleModelArgs['year'])
@@ -194,6 +224,8 @@ def create_or_update_vehicle(request) :
         vehicleArgs['vehicle_model'] = vmodel
         image= None
         fss = None
+
+        # save image to /media/ and save path to string for vehicle table
         try :
             image = request.FILES['pic']
             fss = FileSystemStorage()
@@ -204,11 +236,13 @@ def create_or_update_vehicle(request) :
 
             vehicleArgs['image'] = fss.url(file) 
 
+        # insert vehicle or update
         if v is None :
             v = update_model(Vehicle(), vehicleArgs)
         else :
             v = update_model(v, vehicleArgs)
 
+        # insert truck of car row
         if vehicleModelArgs['vehicle_type'] == 'truck' :
             truck = None
             try :
@@ -244,15 +278,17 @@ def create_or_update_vehicle(request) :
 
     return render(request, 'vehiclemanagement/add-vehicle.html', context)
 
+# handle creation or updating of a sale
 @login_required(login_url='/login')
 def create_or_update_sale(request) :
+
+    # grab url query param for sale_id
     if request.method == 'PATCH' :
         return redirect('/sale/' + request.PATCH.get('saleid') + '/')
 
     context = {}
 
-    context = {}
-
+    # grab data for form and send to html page
     if request.method == 'GET':
         v = request.GET.get('v', '')
         sale_id = request.GET.get('saleid', '')
@@ -264,9 +300,11 @@ def create_or_update_sale(request) :
         context['employees'] = Employee.objects.all()
         context['today'] = datetime.datetime.today()
 
+    # handle creation or update form
     if request.method == 'POST':
         sale_id = request.POST.get('old_sale')
 
+        # grab column data from form
         vehicleSaleArgs = {
             'vehicle': get_object_or_404(Vehicle, vin_number=request.POST.get('vin_number')),
             'customer': get_object_or_404(User, username=request.POST.get('customer').lower()),
@@ -275,6 +313,7 @@ def create_or_update_sale(request) :
             'sale_date': request.POST.get('sale_date')
         }
 
+        # update or create row
         if sale_id == '':
             update_model(VehicleSale(), vehicleSaleArgs)
         else :
@@ -324,6 +363,7 @@ def index(request):
     return render(request, 'vehiclemanagement/index.html', context)
 
 # gets revenue for each month and serializes it to json for jan-dec of current year
+@login_required(login_url='/login/')
 def get_revenue_chart_data(request):
     if request.method == 'GET':
 
@@ -344,6 +384,7 @@ def get_revenue_chart_data(request):
             else :
                 context[i] = c
 
+        # return json of dictionary
         return JsonResponse(context)
     return JsonResponse({})
 

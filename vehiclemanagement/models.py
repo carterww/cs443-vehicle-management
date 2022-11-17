@@ -1,8 +1,13 @@
+# File that contains the clases that map to tables in the MySQL database
+# Each class specifies the columns and constraints on those columns and django
+# handles migrating changes to the database with the command manage.py makemigrations
+# then manage.py migrate
+
+
 from django.db import models
 
 from django.contrib.auth.models import User
 
-# Create your models here.
 # Table that represents an employee
 # Is a sub-entity of User table
 class Employee(models.Model):
@@ -41,6 +46,7 @@ class VehicleModel(models.Model):
     def __str__(self):
         return '%s %s %d' % (self.make, self.model, self.year)
 
+# table that represents a vehicle
 class Vehicle(models.Model):
     vin_number = models.CharField(max_length=17, primary_key=True)
     price = models.DecimalField(max_digits=11, decimal_places=2)
@@ -56,6 +62,8 @@ class Vehicle(models.Model):
     def __str__(self):
         return self.vin_number
 
+# table that represents a car
+# is a subentity of vehicle
 class Car(models.Model):
     vehicle = models.OneToOneField('Vehicle', primary_key=True, on_delete=models.CASCADE, related_name='car')
     max_speed = models.SmallIntegerField(null=True)
@@ -64,6 +72,8 @@ class Car(models.Model):
     def __str__(self):
         return self.vehicle.vin_number
 
+# table that represents a truck
+# is a subentity of vehicle
 class Truck(models.Model):
     vehicle = models.OneToOneField('Vehicle', primary_key=True, on_delete=models.CASCADE, related_name='truck')
     bed_area = models.FloatField()
@@ -72,9 +82,10 @@ class Truck(models.Model):
     def __str__(self):
         return self.vehicle.vin_number
 
+# represents a vehicle transaction where a vehicle is sold to a customer
 class VehicleSale(models.Model):
     sale_price = models.DecimalField(max_digits=11, decimal_places=2)
-    sale_date = models.DateField(auto_now_add=True)
+    sale_date = models.DateField(auto_now_add=True, db_index=True)
 
     employee = models.ForeignKey('Employee', on_delete=models.RESTRICT, related_name='employee_sales')
     vehicle = models.ForeignKey('Vehicle', on_delete=models.RESTRICT, related_name='vehicle_sales')
@@ -82,10 +93,3 @@ class VehicleSale(models.Model):
 
     def __str__(self):
         return '%s %s %s' % (self.employee, self.customer, self.vehicle)
-
-
-
-
-
-
-

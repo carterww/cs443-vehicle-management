@@ -1,0 +1,3 @@
+# Vehicle Management System
+
+This software system functions as a vehicle management system for a dealership. The system includes a MySQL database to store data, a backend that handles user interaction with the database, and a frontend that allows users to send commands to the backend. The system tracks vehicles, customers, employees, and vehicle sales; this data is presented to the user via a web interface. The backend allows users to create, retrieve, and update records in the database. This system was created primarily in SQL, Python, HTML, CSS, and Javascript with the following libraries/packages/programs: Django, MySQL, Pillow, ChartJS, and Bootstrap.

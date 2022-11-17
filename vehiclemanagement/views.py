@@ -11,6 +11,7 @@ import math
 
 from .models import *
 
+@login_required(login_url='/login')
 def search_employee(request) :
     context = {}
 
@@ -27,6 +28,7 @@ def search_employee(request) :
 
     return render(request, 'vehiclemanagement/find-employee.html', context)
 
+@login_required(login_url='/login')
 def search_vehicle(request) :
     context = {}
     

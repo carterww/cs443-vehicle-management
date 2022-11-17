@@ -2,7 +2,7 @@
 # Each function that returns render() is associated with a url and handles HTTP requests from that url.
 # These functions interact with the database through django's ORM and returns HTML pages for the user.
 
-
+from django.http import HttpResponseBadRequest
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -315,6 +315,8 @@ def create_or_update_sale(request) :
 
         # update or create row
         if sale_id == '':
+            if vehicleSaleArgs['vehicle'].is_sold :
+                return HttpResponseBadRequest('Vehicle already sold')
             update_model(VehicleSale(), vehicleSaleArgs)
         else :
             update_model(get_object_or_404(VehicleSale, pk=sale_id), vehicleSaleArgs)
